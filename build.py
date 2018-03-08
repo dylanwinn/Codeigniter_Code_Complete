@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 #
 # CodeComplete for CodeIgniter
-# Creates a reflection of a codeIgniter project, and for each class adds 
-# comments and data types to enable code completion in IDEs such as eclipse
+# Creates a reflection of a CodeIgniter project, and for each class adds
+# comments and data types to enable code completion in IDEs such as Eclipse
 #
 # Supports the following structures
 # $this->load->model('my_model');
@@ -11,7 +11,7 @@
 # $this->load->model(array('my_model', 'my_other_model'));
 # $this->load->model(
 #    array(
-#       'my_model', 
+#       'my_model',
 #       'my_other_model'
 #   ));
 # $this->CI =& get_instance();
@@ -39,7 +39,7 @@ SELF_DIR = os.path.abspath(os.path.dirname(sys._getframe(0).f_code.co_filename))
 CI_DIRS = ['models','controllers','libraries','helpers','core', 'hooks']
 
 
-#Define our regexs / patterns   
+#Define our regexs / patterns
 CLASS_OPEN_BRACKET = '{'
 CLASS_CLOSE_BRACKET = '}'
 PHP_TAG = '<?php'
@@ -56,25 +56,25 @@ LOAD_PATTERN = r"^[\s]*?[^//,*][\s]*?\$([^\s\\]*?)(?:->[\s]*?load[\s]*?->[\s]*?(
 # (?:                           start a non capturing match
 # ->[\s]*?load[\s]*?->[\s]*?    find the string '->' then whitespace 0 or more times then 'load' the white space 0 or more times then '->' the white space 0 or more times
 # (?:                           start non capturing match
-# model|library                 then find the string 'model' OR 'library' 
+# model|library                 then find the string 'model' OR 'library'
 # )                             close non capturing match
 # )                             close non capturing match
 # (                             Start a capturing match
 #.*?\)                          Look for any character (.) 0 or more times (*) non greedy (?) leading up to a close bracket \) (escaped)
 #)                              Close returning match.
 #
-# this will return  (array('my_model','anonther_model'))  from 
-# $this -> load -> model( array('my_model','anonther_model' ));  
+# this will return  (array('my_model','anonther_model'))  from
+# $this -> load -> model( array('my_model','anonther_model' ));
 # or ('my_library') from
 # $this->load->library('my_library');
- 
+
 
 AUTOLOAD_PATTERN = r"(?:(?:[^\|[\s]*?]|^)\$autoload\['(?:model|libraries)'\][\s]*?=[\s]*?array[\s]*?)(.*?\))"
 # r                             Escape python reg ex string
 # (?:                           Start a non capturing match
 # (?:                           Start a inner non capturing match
 # [^\|[\s]*?]|^)                match a string that does NOT start with a pipe  followed by 0 or more white space (ie, the CI comments)
-# \$autoload\['                 followed by the string $autoload[' 
+# \$autoload\['                 followed by the string $autoload['
 # (?:model|libraries)           start non capturing match for models or libraries
 # '\][\s]*?=[\s]*?array[\s]*?   match the string  '] = array with 0 or more spaces between the =
 # )                             close the no capturing match
@@ -86,8 +86,8 @@ CLASS_LIST_PATTERN = '\"(.+?)\"|\'(.+?)\''
 
 COMMENT_PATTERN = """/**
  * @var {class}
- */            
-var ${var};    
+ */
+var ${var};
 """
 
 
@@ -100,7 +100,7 @@ files_created = 0
 
 # Loggin constants
 FAIL = -1
-NORM = 0    
+NORM = 0
 WARN = 1
 INFO = 2
 TITLE = 3
@@ -111,43 +111,43 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--codeigniter', default='../www', help='path to codeigniter project relative to codecomplete')
     args = parser.parse_args()
-    
+
 
     global ci_dir
     ci_dir = os.path.abspath(os.path.join(SELF_DIR, args.codeigniter));
     system_dir = os.path.abspath(os.path.join(SELF_DIR, args.codeigniter, 'system'))
     applicaiton_dir = os.path.abspath(os.path.join(SELF_DIR, args.codeigniter, 'application'))
     modules_dir = os.path.abspath(os.path.join(SELF_DIR, args.codeigniter, 'application', 'modules'))
-    
+
     msg('')
     msg('Codeigniter Codecomplete generator', TITLE)
     msg('CI site : ' + ci_dir, INFO)
-    
-        
+
+
     generated_files = os.path.join(SELF_DIR, 'application')
     #Clean old generated files
     if( os.path.exists( generated_files )):
         msg('Removing existing generated files...', INFO)
-    	shutil.rmtree( generated_files )
-    
+        shutil.rmtree( generated_files )
+
     msg('Creating codecomplete files at ' + generated_files, INFO)
     msg('--------------------')
-    
+
     #Also check for autoload.php in the config...
-    findClasses(applicaiton_dir, parseFile)   
+    findClasses(applicaiton_dir, parseFile)
     findModules(modules_dir, parseFile)
-    
+
     msg('')
     msg('--------------------')
-    msg(''.join(["Finished: " ,`files_created`," files created "]))
-    msg("Please unsure you have the following path added to your PHP Build path:", TITLE)
+    msg(''.join(["Finished: " ,str(files_created)," files created "]))
+    msg("Please ensure you have the following path added to your PHP Build path:", TITLE)
     msg(SELF_DIR, INFO)
-    
-    
-    
 
 
-          
+
+
+
+
 # Finds any auto loaded classes that need to be added to all output classes
 def findAutoLoad(top):
     auto_loads_str=''
@@ -155,10 +155,10 @@ def findAutoLoad(top):
     if (os.path.exists( filepath )):
         #Open autoload and get loads of models and libraries
         in_file = open(filepath, 'r+')
-    
+
         with in_file as f:
             data = mmap.mmap(f.fileno(), 0)
-        
+
             #Get the Class definition
             it1 = re.finditer(AUTOLOAD_PATTERN, data, re.M | re.I | re.S)
             for mo1 in it1:
@@ -166,18 +166,18 @@ def findAutoLoad(top):
                 for mo2 in it2:
                     #write the property out
                     auto_loads_str = ''.join([auto_loads_str, '\n', getComment(mo2.group(0))])
-    
-    return auto_loads_str            
-               
-            
+
+    return auto_loads_str
+
+
 
 # Finds the models and controllers dirs in an MVC triad location
 def findClasses (top, callback):
     #First get any autoloaded classes, as these will need to be added to
     #each of our individual classes
     global auto_loads
-    auto_loads = ''.join( [auto_loads, findAutoLoad(top)] )   
-    
+    auto_loads = ''.join( [auto_loads, findAutoLoad(top)] )
+
     #Check for php classes in the CI folders we are scanning.
     for dir in CI_DIRS:
         walktree(os.path.join( top, dir), callback)
@@ -190,7 +190,7 @@ def findModules(top, callback):
             pathname = os.path.join(top, f)
             mode = os.stat(pathname)[ST_MODE]
             if S_ISDIR(mode):
-		         # It's a directory, find its classes
+                # It's a directory, find its classes
                 findClasses(pathname, callback)
             else:
                 # Unknown file type, print a message
@@ -221,26 +221,26 @@ def walktree(top, callback):
 
 # Parse a php class, and make a code hint copy of it
 def parseFile(filepath):
-  
-    #Get the auto loads that are applied to every class        
-    global auto_loads  
-   
+
+    #Get the auto loads that are applied to every class
+    global auto_loads
+
     class_header = ''
     class_footer = '\n'+CLASS_CLOSE_BRACKET
     class_name = getFileName(filepath) # Assume class name is same as file..
-    
+
     # if the user has loaded an instance of CI into a local var, it will be saved here
     ci_field = ''
-    
+
     # dictionary of members indexed by scope / parent class
     classes = {}
-    
+
     #Open out files (and create the out file)
     in_file = open(filepath, 'r+')
-        
+
     with in_file as f:
         data = mmap.mmap(f.fileno(), 0)
-        
+
         #Get the main Class definition
         mo = re.search(CLASS_PATTERN, data, re.M)
         if mo:
@@ -248,7 +248,7 @@ def parseFile(filepath):
             #Check if we need to add the php tag, and start the class..
             if CLASS_OPEN_BRACKET not in class_header:
                 class_header = join([class_header,' ',CLASS_OPEN_BRACKET])
-			
+
             if PHP_TAG not in class_header:
                 class_header = join([PHP_TAG,'\n',class_header])
 
@@ -263,10 +263,10 @@ def parseFile(filepath):
             ci_comment = buildCommentString(ci_instance, ci_type)
             if ('this' not in classes):
                 classes['this'] = ''
-            # Save the CI property to the main scope  
+            # Save the CI property to the main scope
             classes['this'] = join([classes['this'], '\n', ci_comment])
-            
-        
+
+
         # Find any loads for Models, Libraries etc
         it1 = re.finditer(LOAD_PATTERN, data, re.M | re.I | re.S)
         for mo1 in it1:
@@ -277,17 +277,17 @@ def parseFile(filepath):
             # The result is an owner as either 'this' or a property name
             scope = getPropertyName(scope)
             it2 = re.finditer(CLASS_LIST_PATTERN,  members)
-            
+
             for mo2 in it2:
                 # ensure we have a key in the dict..
                 if (scope not in classes):
                     classes[scope] = ''
-    
+
                 #write the property to the appropriate scope key
                 classes[scope] = join([classes[scope], '\n', getComment(mo2.group(0))])
 
-    
-    
+
+
     #Now create the classes.  We have two approaches:
     # If a load was made using $this->load, then we write those types out to the main class
     # If a load was made via another property that was created with =& get_instance() (as in A Hook or Library class)
@@ -296,13 +296,13 @@ def parseFile(filepath):
     #
     # This ensures both $this->my-model  will autocomplete when in an instance of CI_Controller.
     # As well as $this->CI->my_model when referencing the CI_Controller
-    if (('this' in classes) or (auto_loads != '')):
+    if (('this' in classes)): # or (auto_loads != '')
         out_file = cloneFile(filepath)
         #write out the new code complete class
         out_file.write(class_header)
         out_file.write("\n//Class fields")
         out_file.write(classes['this'])
-       
+
        # If we have auto loads, write them out
         if( auto_loads != '' ):
             out_file.write("\n//Auto loaded fields")
@@ -311,18 +311,18 @@ def parseFile(filepath):
             if( class_name in current_auto_load ):
                 current_auto_load = current_auto_load.replace("@var " + class_name, '', re.I)
                 current_auto_load = current_auto_load.replace("var $" + class_name.lower() + ";", '', re.I)
-            
+
             out_file.write(current_auto_load)
-        
-       
+
+
         # if we have a custom instance of CI, write it out
         if( ci_field !='' ):
             out_file.write("\n//CI References\n")
             out_file.write(ci_field);
-        
+
         # Close the class
         out_file.write(class_footer)
-         
+
         # write out remaining local classes (local instance of CI for example)
         for k, v in classes.iteritems():
             if(k != 'this'):
@@ -330,24 +330,24 @@ def parseFile(filepath):
                 out_file.write( join(['class ', k, '_', class_name, ' extends CI_Controller ', CLASS_OPEN_BRACKET]))
                 out_file.write(v)
                 out_file.write(class_footer)
-        
+
         out_file.close()
-        
+
     in_file.close()
-    
+
 
 # Returns the file name (file name) from a file path
 def getFileName(filepath):
     file = os.path.split(filepath)[-1]
     file_name = file.replace('.php','')
-    return file_name    
-    
-    
-# Strips out this->, or this -> from the property path     
+    return file_name
+
+
+# Strips out this->, or this -> from the property path
 def getPropertyName(propertyPath):
     return re.sub(r'this[.*]?->','',propertyPath)
 
-    
+
 def cloneFile(filepath):
     #Resolve path to new code-complete file
     cc_filepath = filepath.replace(ci_dir, SELF_DIR)
@@ -357,29 +357,32 @@ def cloneFile(filepath):
     global files_created
     files_created+=1
     return out_file
-        
+
 # Makes a writable dir path based on the path passed in
 def makeDir(path):
     #Get the dir path for the new file
     dirs = os.path.split(path)[0]
     #Make dir structure
-    try: os.makedirs(dirs, 0777)
+    try: os.makedirs(dirs, 0o777)
     except OSError as err:
-        # Reraise the error unless it's about an already existing directory 
-        if err.errno != errno.EEXIST or not os.path.isdir(dirs): 
+        # Reraise the error unless it's about an already existing directory
+        if err.errno != errno.EEXIST or not os.path.isdir(dirs):
             raise
-            msg("Could not mk dirs", FAIL)
-    
+        msg("Could not mk dirs", FAIL)
+
 
 # Returns the comment structure for the classpath passed in
 def getComment(classpath):
-    
+
     #clean the quotes out - cant get the regex above to do this for some reason.
     classpath =  classpath.replace('\"','').replace('\'','')
     #Split on path delimiters, and take the last element, the class name
     classpath = classpath.split('/')
-    classname = classpath[-1]
-    
+    if(classpath[-1] != ''):
+        classname = classpath[-1]
+    else:
+        classname = classpath[-2]
+
     return buildCommentString(classname)
 
 # Builds the comment string for  classname and type
@@ -388,41 +391,37 @@ def buildCommentString(classname, type=None):
         comment = COMMENT_PATTERN.replace("{class}", upcase_first_letter(classname))
     else:
         comment = COMMENT_PATTERN.replace("{class}", type)
-    
+
     comment = comment.replace("{var}", classname)
     return comment
 
-    
+
 def upcase_first_letter(s):
     return s[0].upper() + s[1:]
-    
+
 def join( array ):
     return ''.join(array)
 
 def msg( str, type=0 ):
     if(type==NORM):
-        print  '\033[92m', str, '\033[0m'   
-    
+        print  ('\033[92m', str, '\033[0m')
+
     elif( type == WARN ):
-        print  '\033[93m', str, '\033[0m'    
+        print  ('\033[93m', str, '\033[0m')
 
     elif ( type == INFO ):
-        print  '\033[95m', str, '\033[0m'
-        
+        print  ('\033[95m', str, '\033[0m')
+
     elif ( type == TITLE ):
-        print  '\033[1m', str, '\033[0m'       
-        
+        print  ('\033[1m', str, '\033[0m')
+
     elif( type == FAIL ):
-        print  '\033[91m', str, '\033[0m'  
-        sys.exit(1)	
-        
+        print  ('\033[91m', str, '\033[0m')
+        sys.exit(1)
 
-	
-	
-# go	
+
+
+
+# go
 if __name__ == '__main__':
-	main()
-
-
-
-
+    main()
